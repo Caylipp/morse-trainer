@@ -4,8 +4,33 @@ Die App ist fertig konfiguriert (Icon, Splash, Bundle-ID `com.philipphoang.morse
 keine Berechtigungen, Export-Compliance gesetzt). Es fehlen nur Schritte, die an deine
 Apple-ID bzw. dein iPhone gebunden sind.
 
-Es gibt zwei Wege. **Empfehlung: Weg B**, sobald du die App dauerhaft nutzen oder
-weitergeben willst; Weg A, wenn du sie heute kostenlos ausprobieren willst.
+Es gibt drei Wege. **Weg 0 (LiveContainer)**, wenn du LiveContainer schon nutzt; **Weg B**,
+sobald du die App dauerhaft nutzen oder weitergeben willst; Weg A, wenn du sie ohne
+LiveContainer kostenlos per Kabel installieren willst.
+
+---
+
+## Weg 0 – LiveContainer (ohne Apple-ID-Slot, ohne Kabel)
+
+Wenn du [LiveContainer](https://github.com/LiveContainer/LiveContainer) nutzt, brauchst du
+keinen deiner 3 App-Plätze: LiveContainer führt die App in sich aus und signiert sie beim
+Import mit seinem eigenen Zertifikat.
+
+```bash
+npm run ios:ipa      # baut dist/MorseTrainer.ipa (unsigniert, Release)
+```
+
+1. `dist/MorseTrainer.ipa` per AirDrop oder iCloud Drive aufs iPhone bringen
+   (in der Dateien-App speichern).
+2. LiveContainer öffnen → **„+“** oben rechts → die IPA auswählen.
+3. „Morse-Trainer“ in der Liste antippen und starten.
+
+Updates: `npm run ios:ipa` erneut ausführen und die neue IPA genauso importieren
+(LiveContainer fragt, ob die bestehende App ersetzt werden soll – Einstellungen und
+Lernfortschritt bleiben erhalten).
+
+Die App braucht keine Erweiterungen, Push-Nachrichten oder besonderen Berechtigungen,
+also nichts, was LiveContainer nicht unterstützt.
 
 ---
 
