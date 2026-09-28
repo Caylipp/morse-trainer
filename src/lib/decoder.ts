@@ -50,6 +50,8 @@ const MIN_UNIT = 25;
 const HISTORY = 16;
 /** Ab diesem Verhältnis der Cluster-Mitten gelten die Drücke als Punkte *und* Striche. */
 const BIMODAL_RATIO = 2;
+/** Längere Drücke fließen nur bis zu diesem Vielfachen der bisherigen Strichlänge ins Lernen ein. */
+const OUTLIER_FACTOR = 2;
 const MAX_UNIT = 800;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -195,7 +197,11 @@ export class MorseDecoder {
 
   /** Lernt aus einer Druckdauer und klassifiziert sie. */
   private learn(duration: number): MorseSymbol {
-    this.history = [...this.history, duration].slice(-HISTORY);
+    // Ein einzelner sehr langer Druck (Festhalten, Ruckler) darf das Clustering
+    // nicht kippen – sonst gälte er als "Strich" und echte Striche als Punkte.
+    // Echte Tempowechsel setzen sich trotzdem durch, weil die Grenze mitwächst.
+    const sample = Math.min(duration, OUTLIER_FACTOR * this.dashAvg);
+    this.history = [...this.history, sample].slice(-HISTORY);
     const clusters = twoMeans(this.history);
     if (clusters && clusters[1] / clusters[0] >= BIMODAL_RATIO) {
       this.dotAvg = clamp(clusters[0], MIN_UNIT, MAX_UNIT);
@@ -205,12 +211,13 @@ export class MorseDecoder {
 
     // Nur eine Sorte Drücke in letzter Zeit: gegen die bisherige Schwelle einordnen.
     const symbol: MorseSymbol = duration < this.threshold ? '.' : '-';
-    const a = this.opts.smoothing;
-    if (symbol === '.') {
-      this.dotAvg = clamp(this.dotAvg + a * (duration - this.dotAvg), MIN_UNIT, MAX_UNIT);
-    } else {
-      this.dashAvg = clamp(this.dashAvg + a * (duration - this.dashAvg), 2 * MIN_UNIT, 3 * MAX_UNIT);
-    }
+    // Die ersten Drücke zählen stärker (laufender Mittelwert), danach gleitend.
+    const a = Math.max(this.opts.smoothing, 1 / this.history.length);
+    // Jede Messung verschiebt beide Mittelwerte (Punkt : Strich = 1 : 3), damit
+    // sich das Tempo auch anpasst, wenn gerade nur eine Sorte getastet wird.
+    const dot = symbol === '.' ? sample : sample / 3;
+    this.dotAvg = clamp(this.dotAvg + a * (dot - this.dotAvg), MIN_UNIT, MAX_UNIT);
+    this.dashAvg = clamp(this.dashAvg + a * (3 * dot - this.dashAvg), 2 * MIN_UNIT, 3 * MAX_UNIT);
     // Punkt und Strich müssen unterscheidbar bleiben (mindestens Faktor 1,8).
     if (this.dashAvg < 1.8 * this.dotAvg) {
       const mid = (this.dotAvg + this.dashAvg) / 2;

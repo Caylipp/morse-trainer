@@ -28,9 +28,12 @@ function context(): AudioContext | null {
 
 export async function prepareSidetone(frequency: number, volume: number): Promise<void> {
   sideVolume = volume;
-  // Der AudioContext darf erst nach einer Nutzeraktion starten; siehe sidetoneOn.
-  if (sideOsc && ctx) sideOsc.frequency.setValueAtTime(frequency, ctx.currentTime);
   pendingFrequency = frequency;
+  // Den AudioContext schon jetzt anlegen (startet pausiert und wird beim ersten
+  // Druck fortgesetzt). Das Anlegen kann dauern und würde sonst den ersten
+  // Tastendruck blockieren und seine gemessene Länge verfälschen.
+  const c = context();
+  if (sideOsc && c) sideOsc.frequency.setValueAtTime(frequency, c.currentTime);
 }
 
 export function sidetoneOn(): void {
