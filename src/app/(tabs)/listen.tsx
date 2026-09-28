@@ -16,7 +16,8 @@ import { pickNextChar, recordAttempt, unlockedChars } from '../../lib/koch';
 import { encodeChar, prettyCode } from '../../lib/morse';
 import { farnsworthSpacing } from '../../lib/timing';
 import { useStore } from '../../state/store';
-import { colors, radius } from '../../theme/colors';
+import { useT } from '../../i18n';
+import { Palette, radius, useTheme } from '../../theme';
 
 interface Answer {
   picked: string;
@@ -24,6 +25,8 @@ interface Answer {
 }
 
 export default function ListenScreen() {
+  const { colors, styles } = useTheme(makeStyles);
+  const t = useT();
   const { progress: all, setProgress, settings } = useStore();
   const progress = all.listen;
   const [started, setStarted] = useState(false);
@@ -89,19 +92,19 @@ export default function ListenScreen() {
       <ScrollView contentContainerStyle={styles.page}>
         <KochHeader progress={progress} />
         <Text style={styles.info}>
-          Zeichen mit {settings.charWpm} WPM, Pausen wie {settings.effectiveWpm} WPM (Farnsworth)
+          {t('listen.info', { char: settings.charWpm, eff: settings.effectiveWpm })}
         </Text>
 
         {unlocked && (
           <Card style={styles.unlock}>
             <Text style={styles.unlockText}>
-              Neues Zeichen: <Text style={styles.unlockChar}>{unlocked}</Text>{' '}
+              {t('koch.newChar')} <Text style={styles.unlockChar}>{unlocked}</Text>{' '}
               {prettyCode(encodeChar(unlocked) ?? '')}
             </Text>
             <View style={styles.row}>
-              <Button icon="volume-high" label="Anhören" onPress={() => play(unlocked)} />
+              <Button icon="volume-high" label={t('common.listen')} onPress={() => play(unlocked)} />
               <Button
-                label="Weiter"
+                label={t('common.next')}
                 variant="primary"
                 onPress={() => {
                   setUnlocked(null);
@@ -114,7 +117,7 @@ export default function ListenScreen() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={started ? 'Zeichen wiederholen' : 'Übung starten'}
+          accessibilityLabel={t(started ? 'listen.repeat' : 'listen.start')}
           onPress={() => {
             if (!started) setStarted(true);
             play(target);
@@ -130,12 +133,12 @@ export default function ListenScreen() {
             <>
               <Text style={[styles.bigChar, { color: answer.correct ? colors.good : colors.bad }]}>{target}</Text>
               <SymbolRow code={targetCode} size={12} color={colors.muted} />
-              {!answer.correct && <Text style={styles.small}>Deine Antwort: {answer.picked}</Text>}
+              {!answer.correct && <Text style={styles.small}>{t('listen.yourAnswer', { char: answer.picked })}</Text>}
             </>
           ) : (
             <>
               <Text style={styles.playIcon}>{started ? (playing ? '♪' : '↻') : '▶'}</Text>
-              <Text style={styles.small}>{started ? 'Nochmal hören' : 'Start'}</Text>
+              <Text style={styles.small}>{t(started ? 'listen.again' : 'listen.startShort')}</Text>
             </>
           )}
         </Pressable>
@@ -148,7 +151,7 @@ export default function ListenScreen() {
               <Pressable
                 key={c}
                 accessibilityRole="button"
-                accessibilityLabel={`Antwort ${c}`}
+                accessibilityLabel={t('listen.answer', { char: c })}
                 onPress={() => pick(c)}
                 disabled={!started || !!answer}
                 style={({ pressed }) => [
@@ -169,7 +172,8 @@ export default function ListenScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   page: { padding: 16, gap: 14 },
   row: { flexDirection: 'row', gap: 8 },

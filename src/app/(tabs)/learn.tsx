@@ -21,7 +21,8 @@ import { pickNextChar, recordAttempt, unlockedChars } from '../../lib/koch';
 import { encodeChar, prettyCode } from '../../lib/morse';
 import { farnsworthSpacing } from '../../lib/timing';
 import { useStore } from '../../state/store';
-import { colors, radius } from '../../theme/colors';
+import { useT } from '../../i18n';
+import { Palette, radius, useTheme } from '../../theme';
 
 interface Feedback {
   correct: boolean;
@@ -31,6 +32,8 @@ interface Feedback {
 
 export default function LearnScreen() {
   useKeepAwake();
+  const { colors, styles } = useTheme(makeStyles);
+  const t = useT();
   const { height } = useWindowDimensions();
   const { progress: all, setProgress, settings } = useStore();
   const progress = all.send;
@@ -114,12 +117,12 @@ export default function LearnScreen() {
         {unlocked && (
           <Card style={styles.unlock}>
             <Text style={styles.unlockText}>
-              Neues Zeichen: <Text style={styles.unlockChar}>{unlocked}</Text>{' '}
+              {t('koch.newChar')} <Text style={styles.unlockChar}>{unlocked}</Text>{' '}
               {prettyCode(encodeChar(unlocked) ?? '')}
             </Text>
             <View style={styles.row}>
-              <Button icon="volume-high" onPress={() => play(unlocked)} accessibilityLabel="Anhören" />
-              <Button label="Weiter" onPress={() => setUnlocked(null)} variant="primary" />
+              <Button icon="volume-high" onPress={() => play(unlocked)} accessibilityLabel={t('common.listen')} />
+              <Button label={t('common.next')} onPress={() => setUnlocked(null)} variant="primary" />
             </View>
           </Card>
         )}
@@ -145,27 +148,28 @@ export default function LearnScreen() {
             <Text style={styles.feedback} numberOfLines={2}>
               {feedback
                 ? feedback.correct
-                  ? '✓ Richtig!'
-                  : `✗ Gesendet: ${feedback.sentChar ?? '?'} (${prettyCode(feedback.sentCode)})`
-                : snapshot.code
-                  ? prettyCode(snapshot.code)
-                  : 'Taste dieses Zeichen'}
+                  ? t('learn.correct')
+                  : t('learn.wrong', { char: feedback.sentChar ?? '?', code: prettyCode(feedback.sentCode) })
+                : snapshot.preview
+                  ? prettyCode(snapshot.preview)
+                  : t('learn.prompt')}
             </Text>
-            <Text style={styles.streak}>{streak > 1 ? `🔥 ${streak} in Folge` : ' '}</Text>
+            <Text style={styles.streak}>{streak > 1 ? t('learn.streak', { n: streak }) : ' '}</Text>
             <View style={styles.row}>
-              <Button icon="volume-high" onPress={() => play(target)} accessibilityLabel="Anhören" />
+              <Button icon="volume-high" onPress={() => play(target)} accessibilityLabel={t('common.listen')} />
               <Button
                 icon={hint ? 'eye-off-outline' : 'eye-outline'}
                 onPress={() => setHintOverride(!hint)}
-                accessibilityLabel={hint ? 'Hilfe ausblenden' : 'Hilfe einblenden'}
+                accessibilityLabel={t(hint ? 'learn.hideHint' : 'learn.showHint')}
               />
-              <Button icon="play-skip-forward" onPress={skip} accessibilityLabel="Überspringen" />
+              <Button icon="play-skip-forward" onPress={skip} accessibilityLabel={t('learn.skip')} />
             </View>
           </View>
         </View>
 
         <MorseTree
-          code={snapshot.code}
+          code={snapshot.preview}
+          pending={snapshot.pressed}
           target={hint ? targetCode : undefined}
           enabledChars={chars}
           height={treeHeight}
@@ -186,7 +190,8 @@ export default function LearnScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   page: { flex: 1, padding: 16, gap: 12 },
   row: { flexDirection: 'row', gap: 8 },

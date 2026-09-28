@@ -19,6 +19,12 @@ import { useSettings } from '../state/store';
 
 export interface KeyerSnapshot {
   code: string;
+  /**
+   * Code inklusive des Symbols, das beim Loslassen entstehen würde: Solange die
+   * Taste gehalten wird, erst '.', ab der Strich-Grenze '-'. Für die Vormarkierung
+   * im Morse-Baum.
+   */
+  preview: string;
   text: string;
   pressed: boolean;
   /** Druckdauer im Verhältnis zur Punkt/Strich-Grenze (>= 1 bedeutet Strich). */
@@ -56,6 +62,7 @@ export function useKeyer(onEvents?: (events: DecoderEvent[], api: KeyerApi) => v
   const snap = useCallback(
     (t: number): KeyerSnapshot => ({
       code: d.code,
+      preview: d.isPressed ? d.code + (d.heldFor(t) >= d.threshold ? '-' : '.') : d.code,
       text: d.text,
       pressed: d.isPressed,
       heldRatio: d.isPressed ? d.heldFor(t) / d.threshold : 0,
@@ -67,6 +74,7 @@ export function useKeyer(onEvents?: (events: DecoderEvent[], api: KeyerApi) => v
   );
   const [snapshot, setSnapshot] = useState<KeyerSnapshot>(() => ({
     code: '',
+    preview: '',
     text: '',
     pressed: false,
     heldRatio: 0,

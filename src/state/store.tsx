@@ -91,7 +91,16 @@ export function useStore(): Store {
   return store;
 }
 
+const noop = () => {};
+
+/**
+ * Einstellungen lesen. Funktioniert auch außerhalb von StoreProvider (z. B. in der
+ * Fehlerseite) und liefert dann die Standardwerte.
+ */
 export function useSettings() {
-  const { settings, updateSettings } = useStore();
-  return { settings, updateSettings };
+  const store = useContext(StoreContext);
+  return {
+    settings: store?.settings ?? DEFAULT_SETTINGS,
+    updateSettings: store?.updateSettings ?? noop,
+  };
 }

@@ -1,15 +1,18 @@
 /**
  * Der Morse-Baum: Punkt verzweigt nach links, Strich nach rechts.
  * Der aktuell getastete Pfad leuchtet, noch erreichbare Zeichen bleiben hell,
- * alles andere wird abgedunkelt.
+ * alles andere wird abgedunkelt. Während die Taste gehalten wird, ist der Zweig
+ * vormarkiert, der beim Loslassen entstehen würde (erst Punkt, ab der
+ * Strich-Grenze Strich).
  */
 
 import { memo, useMemo, useState } from 'react';
 import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
 import Svg, { Circle, G, Line, Text as SvgText } from 'react-native-svg';
 
+import { useT } from '../i18n';
 import { buildTree, parentCode, TreeNode } from '../lib/morse';
-import { colors } from '../theme/colors';
+import { Palette, useTheme } from '../theme';
 
 const DEPTH = 4;
 const NODES = buildTree(DEPTH);
@@ -17,8 +20,10 @@ const NODES = buildTree(DEPTH);
 const FONT = Platform.select({ web: 'system-ui, -apple-system, sans-serif', default: undefined });
 
 interface Props {
-  /** Aktuell getasteter Code. */
+  /** Getasteter Code, inklusive eines gerade gehaltenen Symbols. */
   code: string;
+  /** Das letzte Symbol von `code` ist noch nicht losgelassen (Vormarkierung). */
+  pending?: boolean;
   /** Optional: Code des Zielzeichens, dessen Pfad als Hilfe gestrichelt markiert wird. */
   target?: string;
   /** Optional: nur diese Zeichen werden als "aktiv" hervorgehoben (z. B. Koch-Stufe). */
@@ -26,7 +31,14 @@ interface Props {
   height?: number;
 }
 
-function MorseTreeImpl({ code, target, enabledChars, height = 200 }: Props) {
+const makeStyles = (_colors: Palette) =>
+  StyleSheet.create({
+    wrap: { width: '100%' },
+  });
+
+function MorseTreeImpl({ code, pending = false, target, enabledChars, height = 200 }: Props) {
+  const { colors, styles } = useTheme(makeStyles);
+  const t = useT();
   const [width, setWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
 
@@ -41,14 +53,17 @@ function MorseTreeImpl({ code, target, enabledChars, height = 200 }: Props) {
   }, [width, height]);
 
   const shown = code.slice(0, DEPTH);
+  // Der vorläufige Knoten ist nur dann markiert, wenn er noch im gezeichneten Baum liegt.
+  const pendingCode = pending && code.length <= DEPTH ? shown : null;
   const enabled = enabledChars ? new Set(enabledChars) : null;
 
   const stateOf = (n: TreeNode) => {
     const onPath = shown.startsWith(n.code);
+    const isPending = n.code === pendingCode;
     const isCurrent = n.code === shown;
     const reachable = n.code.startsWith(shown);
     const onTarget = target !== undefined && target.startsWith(n.code);
-    return { onPath, isCurrent, reachable, onTarget };
+    return { onPath, isPending, isCurrent, reachable, onTarget };
   };
 
   return (
@@ -70,23 +85,21 @@ function MorseTreeImpl({ code, target, enabledChars, height = 200 }: Props) {
                   y2={c.cy}
                   stroke={s.onPath ? colors.accent : s.onTarget ? colors.good : colors.border}
                   strokeWidth={s.onPath ? 3 : s.onTarget ? 2 : 1}
-                  strokeDasharray={s.onTarget && !s.onPath ? '4 3' : undefined}
+                  strokeDasharray={
+                    s.isPending ? '6 4' : s.onTarget && !s.onPath ? '4 3' : undefined
+                  }
                 />
               );
             })}
           </G>
-          <Circle
-            cx={layout.root.cx}
-            cy={layout.root.cy}
-            r={5}
-            fill={code ? colors.accent : colors.muted}
-          />
+          <Circle cx={layout.root.cx} cy={layout.root.cy} r={5} fill={code ? colors.accent : colors.muted} />
           {NODES.map((n) => {
             const { cx, cy } = layout.pos(n);
             const s = stateOf(n);
             const isEnabled = !enabled || (n.char !== undefined && enabled.has(n.char));
             const dim = (!s.reachable && code !== '') || !isEnabled;
-            const fill = s.isCurrent ? colors.accent : s.onPath ? colors.accentDim : colors.surfaceHigh;
+            const solid = s.isCurrent && !s.isPending;
+            const fill = solid ? colors.accent : s.onPath ? colors.accentDim : colors.surfaceHigh;
             const stroke = s.onPath
               ? colors.accent
               : s.onTarget
@@ -97,14 +110,22 @@ function MorseTreeImpl({ code, target, enabledChars, height = 200 }: Props) {
             const label = n.char ?? '';
             return (
               <G key={n.code} opacity={dim ? 0.3 : 1}>
-                <Circle cx={cx} cy={cy} r={layout.r} fill={fill} stroke={stroke} strokeWidth={1.5} />
+                <Circle
+                  cx={cx}
+                  cy={cy}
+                  r={layout.r}
+                  fill={fill}
+                  stroke={stroke}
+                  strokeWidth={s.isPending ? 2.5 : 1.5}
+                  strokeDasharray={s.isPending ? '3 2' : undefined}
+                />
                 <SvgText
                   x={cx}
                   y={cy + layout.r * 0.36}
                   fontSize={label.length > 1 ? layout.r * 0.72 : layout.r * 1.0}
                   fontWeight="700"
                   fontFamily={FONT}
-                  fill={s.isCurrent ? colors.bg : colors.text}
+                  fill={solid ? colors.onAccent : colors.text}
                   textAnchor="middle"
                 >
                   {label}
@@ -113,10 +134,10 @@ function MorseTreeImpl({ code, target, enabledChars, height = 200 }: Props) {
             );
           })}
           <SvgText x={2} y={12} fontSize={11} fill={colors.muted} fontFamily={FONT}>
-            ← Punkt
+            {t('tree.dot')}
           </SvgText>
           <SvgText x={width - 2} y={12} fontSize={11} fill={colors.muted} textAnchor="end" fontFamily={FONT}>
-            Strich →
+            {t('tree.dash')}
           </SvgText>
         </Svg>
       )}
@@ -125,7 +146,3 @@ function MorseTreeImpl({ code, target, enabledChars, height = 200 }: Props) {
 }
 
 export const MorseTree = memo(MorseTreeImpl);
-
-const styles = StyleSheet.create({
-  wrap: { width: '100%' },
-});

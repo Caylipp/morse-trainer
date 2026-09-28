@@ -19,6 +19,10 @@ Umsetzung des [Konzepts](concept.md) mit Expo (React Native, TypeScript).
 | **Text** | Text wird in Morse umgewandelt und als Ton, Vibration oder Lichtsignal (Bildschirm blinkt) ausgegeben. Dazu die Morsetabelle; ein Tipp auf ein Zeichen spielt es vor. |
 | **Optionen** | Starttempo, automatische Tempo-Anpassung, Pausen-Toleranz, Zeichentempo und effektives Tempo (Farnsworth), Tonhöhe, Lautstärke, Haptik, Lernstufe. |
 
+Beim Halten der Taste ist im Morse-Baum schon der Zweig vormarkiert, der beim Loslassen entsteht: erst Punkt (links), ab der Strich-Grenze Strich (rechts).
+
+Darstellung: fünf Akzentfarben (Bernstein, Türkis, Blau, Violett, Rosé), jeweils hell und dunkel oder automatisch nach System. Sprachen: Deutsch, Englisch, Vietnamesisch (oder Systemsprache).
+
 Ton (Sinus, Standard 650 Hz) und Haptik laufen bei jedem Druck mit. Im Browser dient die **Leertaste** als Morsetaste.
 Einstellungen und Lernfortschritt werden lokal gespeichert (AsyncStorage). Ein Backend gibt es nicht.
 
@@ -65,7 +69,9 @@ src/
   audio/               Ton (nativ: expo-audio + WAV, Web: Web-Audio-API), Haptik, Wiedergabe
   hooks/useKeyer.ts    verbindet Decoder, Taste, Ton und Anzeige
   components/          Taste, Morse-Baum, Code-Anzeige, UI-Bausteine
-  state/store.tsx      Einstellungen und Fortschritt (persistiert)
+  state/               Einstellungen (inkl. Migration) und Fortschritt (persistiert)
+  theme/               Paletten: Akzentfarbe × hell/dunkel, useTheme(makeStyles)
+  i18n/                Übersetzungen de/en/vi, useT()
 ```
 
 ### Timing-Erkennung
