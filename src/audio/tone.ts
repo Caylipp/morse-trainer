@@ -50,9 +50,8 @@ export async function prepareSidetone(frequency: number, volume: number): Promis
 }
 
 export function sidetoneOn(): void {
-  if (!sidetone) return;
-  sidetone.seekTo(0).catch(() => {});
-  sidetone.play();
+  // Kein seekTo: Die Schleife ist nahtlos, und ein Sprung würde den Start verzögern.
+  sidetone?.play();
 }
 
 export function sidetoneOff(): void {

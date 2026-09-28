@@ -38,6 +38,19 @@ npm run typecheck
 npm run lint
 ```
 
+## Aufs iPhone bringen
+
+Siehe **[DEPLOY.md](DEPLOY.md)**: kostenlos per Kabel über Xcode (7 Tage gültig) oder dauerhaft über
+EAS Build + TestFlight. Texte für den App Store stehen in [store/app-store.md](store/app-store.md),
+die Datenschutzerklärung in [PRIVACY.md](PRIVACY.md).
+
+| Befehl | Zweck |
+|---|---|
+| `npm run check` | Typecheck, Lint, Tests |
+| `npm run ios:sim` | Release-Build im iOS-Simulator |
+| `npm run ios:device` | Release-Build per Kabel aufs iPhone |
+| `npm run build:ios` / `npm run submit:ios` | Cloud-Build (EAS) und Upload zu TestFlight |
+
 ## Aufbau
 
 ```
