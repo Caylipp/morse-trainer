@@ -24,4 +24,6 @@ rm -rf dist/ipa && mkdir -p dist/ipa/Payload
 cp -R "$APP" dist/ipa/Payload/
 (cd dist/ipa && zip -qry ../MorseTrainer.ipa Payload)
 rm -rf dist/ipa
-echo "Fertig: dist/MorseTrainer.ipa ($(du -h dist/MorseTrainer.ipa | cut -f1))"
+# ZIP-Variante für AirDrop: Eine nackte IPA würde iOS selbst zu installieren versuchen.
+(cd dist && rm -f MorseTrainer.ipa.zip && zip -q MorseTrainer.ipa.zip MorseTrainer.ipa)
+echo "Fertig: dist/MorseTrainer.ipa ($(du -h dist/MorseTrainer.ipa | cut -f1)) und dist/MorseTrainer.ipa.zip"
