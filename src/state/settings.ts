@@ -1,5 +1,9 @@
 /** Einstellungen, Standardwerte und Migration gespeicherter Stände (reine Logik). */
 
+export type Language = 'system' | 'de' | 'en' | 'vi';
+export type ThemeMode = 'system' | 'light' | 'dark';
+export type Accent = 'amber' | 'teal' | 'blue' | 'violet' | 'rose';
+
 export interface Settings {
   /** Starttempo der Taste in WPM (der Decoder passt sich danach an). */
   sendWpm: number;
@@ -17,6 +21,9 @@ export interface Settings {
   haptics: boolean;
   /** Im Lernmodus den Code des Zielzeichens anzeigen. */
   showHints: boolean;
+  language: Language;
+  themeMode: ThemeMode;
+  accent: Accent;
 }
 
 /**
@@ -35,6 +42,9 @@ export const DEFAULT_SETTINGS: Settings = {
   sound: true,
   haptics: true,
   showHints: true,
+  language: 'system',
+  themeMode: 'system',
+  accent: 'amber',
 };
 
 export const SETTINGS_VERSION = 3;

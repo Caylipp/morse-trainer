@@ -13,10 +13,11 @@ import {
   unlockedChars,
   windowAccuracy,
 } from '../lib/koch';
-import { colors } from '../theme/colors';
+import { useT } from '../i18n';
+import { Palette, useTheme } from '../theme';
 import { ProgressBar } from './ui';
 
-function accuracyColor(acc: number | undefined): string {
+function accuracyColor(colors: Palette, acc: number | undefined): string {
   if (acc === undefined) return colors.border;
   if (acc >= 0.9) return colors.good;
   if (acc >= 0.6) return colors.accent;
@@ -24,6 +25,8 @@ function accuracyColor(acc: number | undefined): string {
 }
 
 export function KochHeader({ progress, current }: { progress: KochProgress; current?: string }) {
+  const { colors, styles } = useTheme(makeStyles);
+  const t = useT();
   const chars = unlockedChars(progress);
   const acc = windowAccuracy(progress);
   const n = progress.window.length;
@@ -32,12 +35,12 @@ export function KochHeader({ progress, current }: { progress: KochProgress; curr
     <View style={styles.wrap}>
       <View style={styles.row}>
         <Text style={styles.level}>
-          Stufe {progress.level - 1}
-          <Text style={styles.muted}> · {chars.length}/{KOCH_ORDER.length} Zeichen</Text>
+          {t('koch.level', { n: progress.level - 1 })}
+          <Text style={styles.muted}> · {t('koch.chars', { n: chars.length, total: KOCH_ORDER.length })}</Text>
         </Text>
         <Text style={styles.muted}>
           {isComplete(progress)
-            ? 'Alle Zeichen gelernt!'
+            ? t('koch.done')
             : `${n}/${UNLOCK_WINDOW} · ${Math.round(acc * 100)} % → ${next}`}
         </Text>
       </View>
@@ -53,7 +56,7 @@ export function KochHeader({ progress, current }: { progress: KochProgress; curr
               key={c}
               style={[
                 styles.chip,
-                { borderColor: accuracyColor(a) },
+                { borderColor: accuracyColor(colors, a) },
                 c === current && styles.chipCurrent,
               ]}
             >
@@ -66,7 +69,8 @@ export function KochHeader({ progress, current }: { progress: KochProgress; curr
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   wrap: { gap: 8 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   level: { color: colors.text, fontSize: 16, fontWeight: '700' },

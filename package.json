@@ -15,6 +15,7 @@
     "expo-haptics": "~57.0.3",
     "expo-keep-awake": "~57.0.2",
     "expo-linking": "~57.0.11",
+    "expo-localization": "~57.0.2",
     "expo-router": "~57.0.23",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
@@ -56,6 +57,9 @@
     "preset": "jest-expo",
     "testPathIgnorePatterns": [
       "/node_modules/"
+    ],
+    "setupFiles": [
+      "<rootDir>/jest.setup.js"
     ]
   }
 }

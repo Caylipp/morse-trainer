@@ -12,10 +12,13 @@ import { SignalStrip } from '../../components/SignalStrip';
 import { Button, Card } from '../../components/ui';
 import { useKeyer } from '../../hooks/useKeyer';
 import { wpmFromUnit } from '../../lib/timing';
-import { colors } from '../../theme/colors';
+import { useT } from '../../i18n';
+import { Palette, useTheme } from '../../theme';
 
 export default function KeyScreen() {
   useKeepAwake();
+  const { styles } = useTheme(makeStyles);
+  const t = useT();
   const { height } = useWindowDimensions();
   const keyer = useKeyer();
   const { snapshot } = keyer;
@@ -33,25 +36,26 @@ export default function KeyScreen() {
             onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
           >
             <Text style={styles.text} accessibilityLiveRegion="polite">
-              {snapshot.text || (snapshot.code ? '' : <Text style={styles.placeholder}>Dein Text erscheint hier …</Text>)}
+              {snapshot.text ||
+                (snapshot.preview ? '' : <Text style={styles.placeholder}>{t('key.placeholder')}</Text>)}
               <Text style={styles.cursor}>▍</Text>
             </Text>
           </ScrollView>
           <View style={styles.toolbar}>
             <Text style={styles.tempo}>
-              ≈ {Math.round(wpmFromUnit(snapshot.unit))} WPM · Einheit {Math.round(snapshot.unit)} ms
+              {t('key.tempo', { wpm: Math.round(wpmFromUnit(snapshot.unit)), unit: Math.round(snapshot.unit) })}
             </Text>
             <View style={styles.tools}>
-              <Button icon="backspace-outline" onPress={keyer.backspace} accessibilityLabel="Löschen" />
-              <Button icon="trash-outline" onPress={keyer.clear} accessibilityLabel="Alles löschen" />
+              <Button icon="backspace-outline" onPress={keyer.backspace} accessibilityLabel={t('key.backspace')} />
+              <Button icon="trash-outline" onPress={keyer.clear} accessibilityLabel={t('key.clear')} />
             </View>
           </View>
         </Card>
 
-        <MorseTree code={snapshot.code} height={treeHeight} />
+        <MorseTree code={snapshot.preview} pending={snapshot.pressed} height={treeHeight} />
 
         <View style={styles.codeArea}>
-          <CodeDisplay code={snapshot.code} gapProgress={snapshot.gapProgress} />
+          <CodeDisplay code={snapshot.preview} pending={snapshot.pressed} gapProgress={snapshot.gapProgress} />
           <SignalStrip recent={snapshot.recent} unit={snapshot.unit} />
         </View>
 
@@ -66,7 +70,8 @@ export default function KeyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   page: { flex: 1, padding: 16, gap: 12 },
   output: { gap: 8, paddingVertical: 10 },
