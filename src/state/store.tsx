@@ -7,38 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { initialProgress, KochProgress } from '../lib/koch';
+import { DEFAULT_SETTINGS, migrateSettings, Settings, SETTINGS_VERSION } from './settings';
 
-export interface Settings {
-  /** Starttempo der Taste in WPM (der Decoder passt sich danach an). */
-  sendWpm: number;
-  /** Tempo aus den Tastendrücken lernen. */
-  adaptive: boolean;
-  /** Faktor für die Pausenschwellen (1 = Standard, größer = mehr Zeit zwischen Zeichen). */
-  gapTolerance: number;
-  /** Zeichentempo bei der Wiedergabe (WPM). */
-  charWpm: number;
-  /** Effektives Tempo bei der Wiedergabe (Farnsworth, WPM). */
-  effectiveWpm: number;
-  frequency: number;
-  volume: number;
-  sound: boolean;
-  haptics: boolean;
-  /** Im Lernmodus den Code des Zielzeichens anzeigen. */
-  showHints: boolean;
-}
-
-export const DEFAULT_SETTINGS: Settings = {
-  sendWpm: 10,
-  adaptive: true,
-  gapTolerance: 1,
-  charWpm: 20,
-  effectiveWpm: 10,
-  frequency: 650,
-  volume: 0.8,
-  sound: true,
-  haptics: true,
-  showHints: true,
-};
+export { DEFAULT_SETTINGS, type Settings };
 
 export type ProgressKind = 'send' | 'listen';
 
@@ -71,7 +42,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           AsyncStorage.getItem(SETTINGS_KEY),
           AsyncStorage.getItem(PROGRESS_KEY),
         ]);
-        if (s) setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(s) });
+        if (s) setSettings(migrateSettings(JSON.parse(s)));
         if (p) {
           const parsed = JSON.parse(p);
           setAllProgress({
@@ -88,7 +59,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (loaded) AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)).catch(() => {});
+    if (loaded) AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...settings, version: SETTINGS_VERSION })).catch(() => {});
   }, [loaded, settings]);
 
   useEffect(() => {
