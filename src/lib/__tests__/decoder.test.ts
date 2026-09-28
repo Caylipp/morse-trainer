@@ -60,6 +60,42 @@ describe('MorseDecoder', () => {
     expect(d.text).toBe('THE QUICK BROWN FOX ');
   });
 
+  it('separates letters at standard spacing even when slower than the start tempo', () => {
+    const d = new MorseDecoder({ initialUnit: 60 });
+    key(d, 'MORSE KOCH', 110);
+    expect(d.text).toBe('MORSE KOCH ');
+  });
+
+  it('tolerates hesitation within letters up to two units', () => {
+    const d = new MorseDecoder({ initialUnit: 100 });
+    // Innerhalb der Buchstaben 2 Einheiten Pause (statt 1), zwischen Buchstaben 6.
+    let t = 0;
+    const step = (to: number) => {
+      for (; t < to; t += 5) d.tick(t);
+      t = to;
+    };
+    for (const ch of 'PARIS HALLO'.replace(' ', '')) {
+      const code = encodeChar(ch)!;
+      [...code].forEach((s, i) => {
+        d.press(t);
+        step(t + (s === '.' ? 100 : 300));
+        d.release(t);
+        step(t + (i === code.length - 1 ? 600 : 200));
+      });
+    }
+    expect(d.text.replace(/ /g, '')).toBe('PARISHALLO');
+  });
+
+  it('is not thrown off by one very long press', () => {
+    const d = new MorseDecoder({ initialUnit: 60 });
+    d.press(0);
+    d.release(900); // Taste festgehalten
+    d.tick(5000);
+    expect(d.text).toBe('T ');
+    key(d, 'MORSE KOCH', 110, 6000);
+    expect(d.text).toBe('T MORSE KOCH ');
+  });
+
   it('keeps a fixed tempo when adaptive mode is off', () => {
     const d = new MorseDecoder({ initialUnit: 100, adaptive: false });
     key(d, 'EE', 60);

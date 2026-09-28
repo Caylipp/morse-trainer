@@ -14,7 +14,9 @@ weitergeben willst; Weg A, wenn du sie heute kostenlos ausprobieren willst.
 Einmalig:
 
 1. **Xcode → Settings → Accounts → „+“ → Apple ID** und mit deiner Apple-ID anmelden.
-   (Legt automatisch ein kostenloses „Personal Team“ an.)
+   (Legt automatisch ein kostenloses „Personal Team“ an.) Dann dein Team auswählen →
+   **„Manage Certificates…“ → „+“ → „Apple Development“**. Damit liegt das
+   Entwicklerzertifikat im Schlüsselbund, das der Build-Befehl braucht.
 2. **iPhone per USB-Kabel verbinden**, entsperren und „Diesem Computer vertrauen“ bestätigen.
 3. Auf dem iPhone **Entwicklermodus** einschalten:
    *Einstellungen → Datenschutz & Sicherheit → Entwicklermodus* → an → Neustart → bestätigen.
@@ -29,6 +31,10 @@ npm run ios:device
 
 Der Befehl fragt nach dem Gerät und ggf. dem Team (dein Name, „Personal Team“) und
 installiert eine **Release-Version** – sie läuft ohne Mac und ohne Dev-Server.
+Der erste Build dauert 20–40 Minuten, danach geht es deutlich schneller.
+
+Falls macOS nach dem Schlüsselbund-Passwort fragt („codesign möchte … verwenden“):
+dein Mac-Passwort eingeben und **„Immer erlauben“** wählen.
 
 Beim ersten Start: *Einstellungen → Allgemein → VPN & Geräteverwaltung →
 Entwickler-App → „Vertrauen“*.

@@ -25,6 +25,11 @@ describe('settings', () => {
     expect(s.gapTolerance).toBe(1);
   });
 
+  it('resets the v2 tolerance default of 2x', () => {
+    expect(migrateSettings({ version: 2, sendWpm: 20, gapTolerance: 2 }).gapTolerance).toBe(1);
+    expect(migrateSettings({ version: 3, gapTolerance: 2 }).gapTolerance).toBe(2);
+  });
+
   it('does not leak the version field into settings', () => {
     expect(migrateSettings({ version: 2 })).not.toHaveProperty('version');
   });

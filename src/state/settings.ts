@@ -21,13 +21,13 @@ export interface Settings {
 
 /**
  * 20 WPM = 60 ms pro Einheit: Ab 120 ms Halten gilt ein Druck als Strich.
- * Die doppelte Pausen-Toleranz hält das Buchstabenende trotzdem bei ~300 ms,
- * damit kurzes Zögern innerhalb eines Buchstabens ihn nicht zerteilt.
+ * Die Pausenschwellen wachsen mit dem gelernten Tempo mit; Toleranz 1× hält
+ * die Buchstabengrenze unter dem Standardabstand von 3 Einheiten.
  */
 export const DEFAULT_SETTINGS: Settings = {
   sendWpm: 20,
   adaptive: true,
-  gapTolerance: 2,
+  gapTolerance: 1,
   charWpm: 20,
   effectiveWpm: 10,
   frequency: 650,
@@ -37,7 +37,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showHints: true,
 };
 
-export const SETTINGS_VERSION = 2;
+export const SETTINGS_VERSION = 3;
 
 /** Übernimmt gespeicherte Einstellungen und hebt alte Standardwerte auf neue an. */
 export function migrateSettings(stored: Partial<Settings> & { version?: number }): Settings {
@@ -46,6 +46,9 @@ export function migrateSettings(stored: Partial<Settings> & { version?: number }
   // v1 → v2: Haltedauer halbiert. Nur unveränderte alte Standardwerte ersetzen.
   if (version < 2 && settings.sendWpm === 10 && settings.gapTolerance === 1) {
     settings.sendWpm = DEFAULT_SETTINGS.sendWpm;
+  }
+  // v2 → v3: Toleranz 2× trennte bei normalem Tempo keine Buchstaben mehr.
+  if (version === 2 && settings.gapTolerance === 2) {
     settings.gapTolerance = DEFAULT_SETTINGS.gapTolerance;
   }
   return settings;
