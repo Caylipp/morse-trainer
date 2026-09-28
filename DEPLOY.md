@@ -20,9 +20,13 @@ Import mit seinem eigenen Zertifikat.
 npm run ios:ipa      # baut dist/MorseTrainer.ipa (unsigniert, Release)
 ```
 
-1. `dist/MorseTrainer.ipa` per AirDrop oder iCloud Drive aufs iPhone bringen
-   (in der Dateien-App speichern).
-2. LiveContainer öffnen → **„+“** oben rechts → die IPA auswählen.
+1. `dist/MorseTrainer.ipa` über **iCloud Drive** aufs iPhone bringen (im Finder in
+   iCloud Drive ziehen). **Nicht direkt per AirDrop schicken:** iOS versucht eine
+   AirDrop-IPA selbst zu installieren, scheitert an der fehlenden Signatur („Integrität
+   nicht verifiziert“) und hinterlässt ein graues Platzhalter-Icon. Per AirDrop geht
+   nur `dist/MorseTrainer.ipa.zip` – landet in „Dateien“, dort antippen zum Entpacken.
+2. LiveContainer öffnen → **„+“** oben rechts → die IPA auswählen (z. B. unter
+   *iCloud Drive → Morse-Trainer*).
 3. „Morse-Trainer“ in der Liste antippen und starten.
 
 Updates: `npm run ios:ipa` erneut ausführen und die neue IPA genauso importieren
