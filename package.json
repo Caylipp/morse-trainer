@@ -48,7 +48,8 @@
     "ios:device": "expo run:ios --device --configuration Release",
     "check": "npm run typecheck && npm run lint && npm test -- --ci",
     "build:ios": "eas build --platform ios --profile production",
-    "submit:ios": "eas submit --platform ios --latest"
+    "submit:ios": "eas submit --platform ios --latest",
+    "ios:ipa": "sh scripts/build-ipa.sh"
   },
   "private": true,
   "jest": {
