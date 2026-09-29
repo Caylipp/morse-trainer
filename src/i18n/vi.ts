@@ -75,7 +75,7 @@ export const vi: Dictionary = {
   'settings.languageSystem': 'Hệ thống',
   'settings.key': 'Phím',
   'settings.sendWpm': 'Tốc độ ban đầu',
-  'settings.sendWpmHint': 'Giá trị khởi đầu cho việc nhận dạng',
+  'settings.sendWpmHint': 'Thấp hơn = nhiều thời gian suy nghĩ hơn giữa các ký tự',
   'settings.adaptive': 'Tự động điều chỉnh tốc độ',
   'settings.adaptiveHint': 'Học tốc độ của bạn từ độ dài chấm và gạch',
   'settings.gap': 'Độ chờ khoảng nghỉ',

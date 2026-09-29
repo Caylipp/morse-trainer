@@ -75,7 +75,7 @@ export const en: Dictionary = {
   'settings.languageSystem': 'System',
   'settings.key': 'Key',
   'settings.sendWpm': 'Start speed',
-  'settings.sendWpmHint': 'Starting point for recognition',
+  'settings.sendWpmHint': 'Lower = more time to think between characters',
   'settings.adaptive': 'Adapt speed automatically',
   'settings.adaptiveHint': 'Learns your speed from dot and dash lengths',
   'settings.gap': 'Pause tolerance',

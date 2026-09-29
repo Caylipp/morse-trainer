@@ -74,7 +74,7 @@ export const de = {
   'settings.languageSystem': 'System',
   'settings.key': 'Taste',
   'settings.sendWpm': 'Starttempo',
-  'settings.sendWpmHint': 'Ausgangswert für die Erkennung',
+  'settings.sendWpmHint': 'Niedriger = mehr Bedenkzeit zwischen den Zeichen',
   'settings.adaptive': 'Tempo automatisch anpassen',
   'settings.adaptiveHint': 'Lernt dein Tempo aus Punkt- und Strichlängen',
   'settings.gap': 'Pausen-Toleranz',
