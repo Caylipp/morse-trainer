@@ -79,7 +79,7 @@ src/
 - Punkt und Strich werden über getrennte Mittelwerte der Druckdauern unterschieden, die Schwelle liegt in der Mitte. Die Erkennung passt sich damit an Tempo **und** persönliches Punkt/Strich-Verhältnis an.
 - Enthalten die letzten 16 Drücke zwei klar getrennte Längen (Verhältnis ≥ 2), werden beide Mittelwerte per 2-Means-Clustering bestimmt. So rastet die Erkennung auch dann nach wenigen Zeichen ein, wenn das eingestellte Starttempo weit daneben liegt.
 - Pausen ab 2,5 Einheiten beenden einen Buchstaben, ab 5 Einheiten ein Wort (bei Pausen-Toleranz 1×). Das liegt jeweils zwischen den Standardwerten 1/3 bzw. 3/7, sodass korrekt getastete Pausen sicher erkannt werden. Mit der Pausen-Toleranz lassen sich beide Schwellen strecken.
-- Standard: Starttempo 20 WPM (60 ms pro Einheit, Strich ab 120 ms Halten), Pausen-Toleranz 1×. Wer innerhalb von Buchstaben länger zögert, erhöht die Pausen-Toleranz in den Optionen.
+- Standard: Starttempo 10 WPM (120 ms pro Einheit, Strich ab 240 ms Halten), Pausen-Toleranz 1×. Wer innerhalb von Buchstaben länger zögert, erhöht die Pausen-Toleranz in den Optionen.
 
 ## Grenzen / offene Punkte
 

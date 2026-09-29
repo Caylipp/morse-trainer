@@ -30,6 +30,13 @@ describe('settings', () => {
     expect(migrateSettings({ version: 3, gapTolerance: 2 }).gapTolerance).toBe(2);
   });
 
+  it('moves the old 20 WPM default back to 10 but keeps own values', () => {
+    expect(DEFAULT_SETTINGS.sendWpm).toBe(10);
+    expect(migrateSettings({ version: 3, sendWpm: 20 }).sendWpm).toBe(10);
+    expect(migrateSettings({ version: 3, sendWpm: 4 }).sendWpm).toBe(4);
+    expect(migrateSettings({ version: 4, sendWpm: 20 }).sendWpm).toBe(20);
+  });
+
   it('does not leak the version field into settings', () => {
     expect(migrateSettings({ version: 2 })).not.toHaveProperty('version');
   });
