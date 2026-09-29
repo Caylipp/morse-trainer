@@ -1,78 +1,39 @@
 /**
- * Tonerzeugung für iOS/Android über expo-audio.
+ * Tonerzeugung auf iOS/Android.
  *
- * Es gibt keine Echtzeit-Synthese, deshalb werden Sinustöne als WAV in den
- * Cache geschrieben: ein schleifbarer Mithörton für die Taste und je eine
- * Datei pro abgespielter Zeichenfolge.
+ * Bevorzugt Echtzeit-Audio über react-native-audio-api (Oszillator, praktisch
+ * keine Latenz). Dieses Modul ist nativ und fehlt in Expo Go; dort greift
+ * automatisch die dateibasierte Variante aus `tone.fallback.ts` (spürbare Latenz).
  */
 
-import { AudioPlayer, createAudioPlayer, setAudioModeAsync } from 'expo-audio';
-import { File, Paths } from 'expo-file-system';
+import { createToneEngine, LEAD_IN_MS, ToneEngine } from './engine';
+import * as fallback from './tone.fallback';
 
-import type { Segment } from '../lib/timing';
-import { renderLoop, renderSegments } from '../lib/wav';
+export { LEAD_IN_MS };
 
-/** Stille vor der ersten Note in erzeugten Dateien (ms). */
-export const LEAD_IN_MS = 50;
-
-let modeSet = false;
-let sidetone: AudioPlayer | null = null;
-let sidetoneKey = '';
-let sequence: AudioPlayer | null = null;
-let sequenceCounter = 0;
-
-async function ensureAudioMode(): Promise<void> {
-  if (modeSet) return;
-  modeSet = true;
+function createRealtimeEngine(): ToneEngine | null {
   try {
-    await setAudioModeAsync({ playsInSilentMode: true, interruptionMode: 'mixWithOthers' });
+    // Dynamisch laden: Fehlt das native Modul (Expo Go), wirft schon der Import.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { AudioContext, AudioManager } = require('react-native-audio-api');
+    // Wie zuvor: Ton auch bei stummgeschaltetem iPhone, andere Audio-Apps laufen weiter.
+    AudioManager.setAudioSessionOptions({
+      iosCategory: 'playback',
+      iosMode: 'default',
+      iosOptions: ['mixWithOthers'],
+    });
+    AudioManager.setAudioSessionActivity(true).catch(() => {});
+    return createToneEngine(() => new AudioContext());
   } catch (e) {
-    console.warn('Audio-Modus konnte nicht gesetzt werden', e);
+    console.warn('Echtzeit-Audio nicht verfügbar, nutze Dateiwiedergabe', e);
+    return null;
   }
 }
 
-function writeCacheFile(name: string, bytes: Uint8Array): string {
-  const file = new File(Paths.cache, name);
-  file.create({ overwrite: true });
-  file.write(bytes);
-  return file.uri;
-}
+const engine: ToneEngine = createRealtimeEngine() ?? fallback;
 
-export async function prepareSidetone(frequency: number, volume: number): Promise<void> {
-  await ensureAudioMode();
-  const key = `${Math.round(frequency)}-${Math.round(volume * 100)}`;
-  if (sidetone && key === sidetoneKey) return;
-  const uri = writeCacheFile(`sidetone-${key}.wav`, renderLoop(frequency, volume));
-  sidetone?.remove();
-  sidetone = createAudioPlayer({ uri });
-  sidetone.loop = true;
-  sidetoneKey = key;
-}
-
-export function sidetoneOn(): void {
-  // Kein seekTo: Die Schleife ist nahtlos, und ein Sprung würde den Start verzögern.
-  sidetone?.play();
-}
-
-export function sidetoneOff(): void {
-  sidetone?.pause();
-}
-
-/** Spielt eine Ton/Pause-Folge ab. Die Folge beginnt nach `LEAD_IN_MS`. */
-export async function playSegments(segments: Segment[], frequency: number, volume: number): Promise<void> {
-  await ensureAudioMode();
-  stopSegments();
-  // Wechselnde Dateinamen, damit kein Player eine veraltete Datei aus dem Cache liest.
-  const name = `sequence-${sequenceCounter++ % 4}.wav`;
-  const uri = writeCacheFile(name, renderSegments(segments, frequency, volume, undefined, LEAD_IN_MS));
-  sequence = createAudioPlayer({ uri });
-  sequence.play();
-}
-
-export function stopSegments(): void {
-  if (sequence) {
-    sequence.pause();
-    sequence.remove();
-    sequence = null;
-  }
-}
+export const prepareSidetone = engine.prepareSidetone.bind(engine);
+export const sidetoneOn = engine.sidetoneOn.bind(engine);
+export const sidetoneOff = engine.sidetoneOff.bind(engine);
+export const playSegments = engine.playSegments.bind(engine);
+export const stopSegments = engine.stopSegments.bind(engine);
