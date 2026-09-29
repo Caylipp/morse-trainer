@@ -100,12 +100,21 @@ export class MorseDecoder {
     return (this.dotAvg + this.dashAvg) / 2;
   }
 
+  /**
+   * Einheit für die Pausenschwellen. Nie kürzer als die Start-Einheit: Wer schnell
+   * tippt, aber zwischen den Zeichen überlegt, soll dafür nicht bestraft werden.
+   * Punkt und Strich passen sich trotzdem frei an.
+   */
+  private get pauseUnit(): number {
+    return Math.max(this.unit, this.opts.initialUnit);
+  }
+
   get letterGap(): number {
-    return this.opts.letterGapUnits * this.unit;
+    return this.opts.letterGapUnits * this.pauseUnit;
   }
 
   get wordGap(): number {
-    return this.opts.wordGapUnits * this.unit;
+    return this.opts.wordGapUnits * this.pauseUnit;
   }
 
   /** Nichts mehr zu tun: nicht gedrückt, kein offener Buchstabe, Wort abgeschlossen. */

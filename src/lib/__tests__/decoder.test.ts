@@ -42,11 +42,35 @@ describe('MorseDecoder', () => {
     expect(d.unit).toBeGreaterThan(120);
   });
 
-  it('adapts to a faster sender', () => {
+  it('learns faster presses but never shortens pauses below the start tempo', () => {
     const d = new MorseDecoder({ initialUnit: 150 });
-    key(d, 'ETET PARIS KOCH', 50);
-    expect(d.text.trim().endsWith('KOCH')).toBe(true);
+    key(d, 'ETET PARIS', 50);
     expect(d.unit).toBeLessThan(70);
+    expect(d.letterGap).toBe(2.5 * 150);
+  });
+
+  it('decodes fast senders once the start tempo is set accordingly', () => {
+    const d = new MorseDecoder({ initialUnit: 50 });
+    key(d, 'ETET PARIS KOCH', 50);
+    expect(d.text).toBe('ETET PARIS KOCH ');
+  });
+
+  it('gives quick tappers who pause slowly enough time between elements', () => {
+    // Start 5 WPM (240 ms): Punkte nur 80 ms, aber 400 ms Pause im Buchstaben.
+    const d = new MorseDecoder({ initialUnit: 240 });
+    let t = 0;
+    for (const ch of ['...', '---', '...']) {
+      for (const [i, s] of [...ch].entries()) {
+        d.press(t);
+        t += s === '.' ? 80 : 300;
+        d.release(t);
+        const pause = i === ch.length - 1 ? 900 : 400;
+        for (let x = 0; x < pause; x += 10) d.tick(t + x);
+        t += pause;
+      }
+    }
+    d.tick(t + 5000);
+    expect(d.text).toBe('SOS ');
   });
 
   it('tolerates human jitter', () => {
@@ -55,7 +79,8 @@ describe('MorseDecoder', () => {
       seed = (seed * 16807) % 2147483647;
       return seed / 2147483647;
     };
-    const d = new MorseDecoder({ initialUnit: 100 });
+    // Pausen schwanken bis 20 % unter Standard – das Starttempo liegt deshalb etwas höher.
+    const d = new MorseDecoder({ initialUnit: 90 });
     key(d, 'THE QUICK BROWN FOX', 100, 0, () => 0.8 + rnd() * 0.35);
     expect(d.text).toBe('THE QUICK BROWN FOX ');
   });
