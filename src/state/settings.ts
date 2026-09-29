@@ -27,12 +27,13 @@ export interface Settings {
 }
 
 /**
- * 20 WPM = 60 ms pro Einheit: Ab 120 ms Halten gilt ein Druck als Strich.
+ * 10 WPM = 120 ms pro Einheit: Ab 240 ms Halten gilt ein Druck als Strich.
+ * (20 WPM war für Einsteiger zu schnell; der Decoder passt sich danach ohnehin an.)
  * Die Pausenschwellen wachsen mit dem gelernten Tempo mit; Toleranz 1× hält
  * die Buchstabengrenze unter dem Standardabstand von 3 Einheiten.
  */
 export const DEFAULT_SETTINGS: Settings = {
-  sendWpm: 20,
+  sendWpm: 10,
   adaptive: true,
   gapTolerance: 1,
   charWpm: 20,
@@ -47,14 +48,15 @@ export const DEFAULT_SETTINGS: Settings = {
   accent: 'amber',
 };
 
-export const SETTINGS_VERSION = 3;
+export const SETTINGS_VERSION = 4;
 
 /** Übernimmt gespeicherte Einstellungen und hebt alte Standardwerte auf neue an. */
 export function migrateSettings(stored: Partial<Settings> & { version?: number }): Settings {
   const { version = 1, ...rest } = stored;
   const settings = { ...DEFAULT_SETTINGS, ...rest };
   // v1 → v2: Haltedauer halbiert. Nur unveränderte alte Standardwerte ersetzen.
-  if (version < 2 && settings.sendWpm === 10 && settings.gapTolerance === 1) {
+  // v3 → v4: Starttempo zurück von 20 auf 10 WPM, selbst gewählte Werte bleiben.
+  if (version >= 2 && version < 4 && settings.sendWpm === 20) {
     settings.sendWpm = DEFAULT_SETTINGS.sendWpm;
   }
   // v2 → v3: Toleranz 2× trennte bei normalem Tempo keine Buchstaben mehr.
