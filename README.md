@@ -84,6 +84,6 @@ src/
 ## Grenzen / offene Punkte
 
 - Auf echten Geräten noch nicht getestet. Geprüft sind die Unit-Tests, der Web-Build per Browser-Automatisierung und das Bundling für iOS/Android.
-- Nativ wird der Mithörton als geloopte WAV-Datei abgespielt. Die Latenz beim Drücken hängt vom Gerät ab; falls sie stört, wäre ein natives Audio-Modul (z. B. react-native-audio-api) der nächste Schritt.
+- Der Mithörton kommt nativ aus einem dauerhaft laufenden Oszillator (`react-native-audio-api`, gemeinsame Engine mit dem Browser in `src/audio/engine.ts`); die Taste blendet nur die Lautstärke auf, dadurch praktisch keine Verzögerung. **In Expo Go fehlt dieses native Modul**: Dort greift automatisch die Dateiwiedergabe (`tone.fallback.ts`) mit spürbarer Latenz. Zum Testen des Tons deshalb IPA/LiveContainer oder `npm run ios:device` nutzen.
 - iOS kann nicht beliebig lange vibrieren. Die Vibrationsausgabe wird dort durch schnelle Haptik-Impulse angenähert.
 - Noch nicht umgesetzt aus dem Konzept: echte Taschenlampe (statt Bildschirm-Blitz), Morse-Chat zwischen zwei Handys, Wort- und Gruppenübungen beim Hören.
