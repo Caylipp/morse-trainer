@@ -1,4 +1,4 @@
-import { buildSegments, farnsworthSpacing, unitMs } from '../timing';
+import { buildSegments, farnsworthSpacing, unitMs, wpmFromUnit } from '../timing';
 
 describe('timing', () => {
   it('uses the PARIS standard', () => {
@@ -25,6 +25,23 @@ describe('timing', () => {
       { on: true, duration: 60, charIndex: 0 },
       { on: false, duration: 180 },
       { on: true, duration: 180, charIndex: 1 },
+    ]);
+  });
+
+  it('wpmFromUnit is the inverse of unitMs', () => {
+    for (const wpm of [5, 12, 20, 35]) {
+      expect(wpmFromUnit(unitMs(wpm))).toBeCloseTo(wpm);
+    }
+    expect(wpmFromUnit(60)).toBe(20);
+  });
+
+  it('inserts a 7-unit gap between words', () => {
+    const { segments, chars } = buildSegments('E E', farnsworthSpacing(20, 20));
+    expect(chars).toEqual(['E', 'E']);
+    expect(segments).toEqual([
+      { on: true, duration: 60, charIndex: 0 },
+      { on: false, duration: 420 },
+      { on: true, duration: 60, charIndex: 1 },
     ]);
   });
 });
