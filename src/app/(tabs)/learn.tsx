@@ -3,6 +3,7 @@
  * Ab 90 % Treffern über die letzten 20 Versuche kommt ein neues Zeichen dazu.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -154,7 +155,13 @@ export default function LearnScreen() {
                   ? prettyCode(snapshot.preview)
                   : t('learn.prompt')}
             </Text>
-            <Text style={styles.streak}>{streak > 1 ? t('learn.streak', { n: streak }) : ' '}</Text>
+            <Text style={styles.streak}>{streak > 1 ? (
+              <>
+                <Ionicons name="flame-outline" size={13} color={colors.accent} /> {t('learn.streak', { n: streak })}
+              </>
+            ) : (
+              ' '
+            )}</Text>
             <View style={styles.row}>
               <Button icon="volume-high" onPress={() => play(target)} accessibilityLabel={t('common.listen')} />
               <Button

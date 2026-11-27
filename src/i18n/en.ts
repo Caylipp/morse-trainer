@@ -31,7 +31,7 @@ export const en: Dictionary = {
   'learn.correct': '✓ Correct!',
   'learn.wrong': '✗ Sent: {char} ({code})',
   'learn.prompt': 'Key this character',
-  'learn.streak': '🔥 {n} in a row',
+  'learn.streak': '{n} in a row',
   'learn.hideHint': 'Hide hint',
   'learn.showHint': 'Show hint',
   'learn.skip': 'Skip',

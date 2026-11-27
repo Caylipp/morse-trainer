@@ -31,7 +31,7 @@ export const vi: Dictionary = {
   'learn.correct': '✓ Đúng rồi!',
   'learn.wrong': '✗ Đã gửi: {char} ({code})',
   'learn.prompt': 'Hãy gõ ký tự này',
-  'learn.streak': '🔥 {n} lần liên tiếp',
+  'learn.streak': '{n} lần liên tiếp',
   'learn.hideHint': 'Ẩn gợi ý',
   'learn.showHint': 'Hiện gợi ý',
   'learn.skip': 'Bỏ qua',

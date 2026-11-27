@@ -30,7 +30,7 @@ export const de = {
   'learn.correct': '✓ Richtig!',
   'learn.wrong': '✗ Gesendet: {char} ({code})',
   'learn.prompt': 'Taste dieses Zeichen',
-  'learn.streak': '🔥 {n} in Folge',
+  'learn.streak': '{n} in Folge',
   'learn.hideHint': 'Hilfe ausblenden',
   'learn.showHint': 'Hilfe einblenden',
   'learn.skip': 'Überspringen',
