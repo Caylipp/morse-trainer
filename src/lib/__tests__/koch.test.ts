@@ -1,4 +1,7 @@
 import {
+  charReports,
+  topConfusions,
+  totals,
   initialProgress,
   KOCH_ORDER,
   pickNextChar,
@@ -62,5 +65,27 @@ describe('koch', () => {
     }
     expect(Object.keys(counts).sort()).toEqual(['K', 'M', 'R', 'U']);
     expect(counts.K).toBeGreaterThan(counts.M);
+  });
+
+  it('records confusions and reports weakest characters first', () => {
+    let p = initialProgress();
+    p = recordAttempt(p, 'K', false, 'M').progress;
+    p = recordAttempt(p, 'K', false, 'M').progress;
+    p = recordAttempt(p, 'K', true, 'K').progress;
+    p = recordAttempt(p, 'M', true, 'M').progress;
+    expect(p.stats.K.confused).toEqual({ M: 2 });
+    expect(p.stats.M.confused).toBeUndefined();
+    const reports = charReports(p);
+    expect(reports.map((r) => r.char)).toEqual(['K', 'M']);
+    expect(reports[0].errorRate).toBeCloseTo(2 / 3);
+    expect(topConfusions(p)).toEqual([{ char: 'K', answered: 'M', count: 2 }]);
+    expect(totals(p)).toEqual({ attempts: 4, correct: 2 });
+  });
+
+  it('ignores single confusions and respects the minimum attempts', () => {
+    let p = initialProgress();
+    p = recordAttempt(p, 'K', false, 'M').progress;
+    expect(topConfusions(p)).toEqual([]);
+    expect(charReports(p, 2)).toEqual([]);
   });
 });

@@ -73,7 +73,7 @@ export default function ListenScreen() {
   const pick = (char: string) => {
     if (answer || !started) return;
     const correct = char === target;
-    const result = recordAttempt(progress, target, correct);
+    const result = recordAttempt(progress, target, correct, char);
     setProgress('listen', result.progress);
     setAnswer({ picked: char, correct });
     if (settings.haptics) hapticResult(correct);

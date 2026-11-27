@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { initialProgress, KochProgress } from '../lib/koch';
+import type { SrsState } from '../lib/srs';
 import { DEFAULT_SETTINGS, migrateSettings, Settings, SETTINGS_VERSION } from './settings';
 
 export { DEFAULT_SETTINGS, type Settings };
@@ -20,10 +21,14 @@ interface Store {
   progress: Record<ProgressKind, KochProgress>;
   setProgress: (kind: ProgressKind, progress: KochProgress) => void;
   resetProgress: (kind: ProgressKind) => void;
+  /** Lernstand der Abkürzungen (Spaced Repetition). */
+  srs: SrsState;
+  setSrs: (state: SrsState) => void;
 }
 
 const SETTINGS_KEY = 'morse.settings.v1';
 const PROGRESS_KEY = 'morse.progress.v1';
+const SRS_KEY = 'morse.srs.v1';
 
 const StoreContext = createContext<Store | null>(null);
 
@@ -35,13 +40,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     listen: initialProgress(),
   });
 
+  const [srs, setSrs] = useState<SrsState>({});
+
   useEffect(() => {
     (async () => {
       try {
-        const [s, p] = await Promise.all([
+        const [s, p, r] = await Promise.all([
           AsyncStorage.getItem(SETTINGS_KEY),
           AsyncStorage.getItem(PROGRESS_KEY),
+          AsyncStorage.getItem(SRS_KEY),
         ]);
+        if (r) setSrs(JSON.parse(r));
         if (s) setSettings(migrateSettings(JSON.parse(s)));
         if (p) {
           const parsed = JSON.parse(p);
@@ -66,6 +75,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (loaded) AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)).catch(() => {});
   }, [loaded, progress]);
 
+  useEffect(() => {
+    if (loaded) AsyncStorage.setItem(SRS_KEY, JSON.stringify(srs)).catch(() => {});
+  }, [loaded, srs]);
+
   const updateSettings = useCallback((patch: Partial<Settings>) => {
     setSettings((prev) => ({ ...prev, ...patch }));
   }, []);
@@ -79,8 +92,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ loaded, settings, updateSettings, progress, setProgress, resetProgress }),
-    [loaded, settings, updateSettings, progress, setProgress, resetProgress],
+    () => ({ loaded, settings, updateSettings, progress, setProgress, resetProgress, srs, setSrs }),
+    [loaded, settings, updateSettings, progress, setProgress, resetProgress, srs],
   );
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

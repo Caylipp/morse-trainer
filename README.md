@@ -18,6 +18,8 @@ A mobile app for learning Morse code that **visualizes every key press live**: d
 | **Learn** | Koch method for **sending**: start with K and M; a new character unlocks at 90 % accuracy over the last 20 attempts. |
 | **Listen** | Koch method for **receiving** with Farnsworth timing, with progress tracked separately. |
 | **Text** | Converts text to Morse and plays it as tone, vibration or screen flashes, plus a code table. |
+| **Statistics** (from Settings) | Error rate per character for sending and listening, frequent mix-ups (e.g. K heard as M), progress of the abbreviations. |
+| **Q codes and abbreviations** (from Settings) | 40 Q codes and ham abbreviations (QTH, QSL, 73, CQ …) in DE/EN/VI: listen, pick the meaning. Spaced repetition (Leitner boxes), gentle: a mistake only drops one box, no time pressure, new cards only while few are shaky. |
 | **Settings** | Speed, adaptive timing, pause tolerance, Farnsworth, pitch, haptics, 5 accent colors × light/dark, languages DE/EN/VI. |
 
 ## Engineering notes

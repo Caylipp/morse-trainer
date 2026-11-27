@@ -17,6 +17,8 @@ Umsetzung des [Konzepts](concept.md) mit Expo (React Native, TypeScript).
 | **Lernen** | Koch-Methode beim **Senden**: Die App zeigt ein Zeichen, du tastest es. Du startest mit K und M, ab 90 % Treffern über die letzten 20 Versuche kommt ein neues Zeichen dazu. Optional mit Hilfe (Code und Pfad im Baum). |
 | **Hören** | Koch-Methode beim **Hören**: Ein Zeichen wird mit Farnsworth-Timing vorgespielt, du tippst die Antwort. Der Fortschritt wird getrennt vom Senden geführt. |
 | **Text** | Text wird in Morse umgewandelt und als Ton, Vibration oder Lichtsignal (Bildschirm blinkt) ausgegeben. Dazu die Morsetabelle; ein Tipp auf ein Zeichen spielt es vor. |
+| **Statistik** (über Optionen) | Fehlerquote je Zeichen für Senden und Hören, häufige Verwechslungen (z. B. K als M gehört) und Stand der Abkürzungen. |
+| **Q-Codes und Abkürzungen** (über Optionen) | 40 Q-Codes und Funk-Abkürzungen (QTH, QSL, 73, CQ …) auf DE/EN/VI: anhören, Bedeutung wählen. Spaced Repetition (Leitner-Kästen), nachsichtig: Ein Fehler wirft nur einen Kasten zurück, kein Zeitdruck, neue Karten nur, solange wenige wackeln. |
 | **Optionen** | Starttempo, automatische Tempo-Anpassung, Pausen-Toleranz, Zeichentempo und effektives Tempo (Farnsworth), Tonhöhe, Lautstärke, Haptik, Lernstufe. |
 
 Beim Halten der Taste ist im Morse-Baum schon der Zweig vormarkiert, der beim Loslassen entsteht: erst Punkt (links), ab der Strich-Grenze Strich (rechts).

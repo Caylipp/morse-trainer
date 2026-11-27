@@ -77,7 +77,7 @@ export default function LearnScreen() {
       busy.current = true;
       const goal = target;
       const correct = letter.char === goal;
-      const result = recordAttempt(progress, goal, correct);
+      const result = recordAttempt(progress, goal, correct, letter.char);
       setProgress('send', result.progress);
       setFeedback({ correct, sentCode: letter.code, sentChar: letter.char });
       setStreak((s) => (correct ? s + 1 : 0));

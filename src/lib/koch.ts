@@ -23,6 +23,8 @@ export interface CharStats {
   correct: number;
   /** Letzte Ergebnisse für dieses Zeichen, neuestes zuletzt. */
   recent: boolean[];
+  /** Falsche Antworten: welches Zeichen wurde stattdessen gegeben/gehört? Zähler je Antwort. */
+  confused?: Record<string, number>;
 }
 
 export interface KochProgress {
@@ -65,13 +67,23 @@ export interface AttemptResult {
   unlocked?: string;
 }
 
-export function recordAttempt(progress: KochProgress, char: string, correct: boolean): AttemptResult {
+export function recordAttempt(
+  progress: KochProgress,
+  char: string,
+  correct: boolean,
+  /** Tatsächlich gegebene Antwort (für die Verwechslungs-Statistik). */
+  answered?: string,
+): AttemptResult {
   const prev = progress.stats[char] ?? { attempts: 0, correct: 0, recent: [] };
   const stats: CharStats = {
     attempts: prev.attempts + 1,
     correct: prev.correct + (correct ? 1 : 0),
     recent: [...prev.recent, correct].slice(-RECENT_PER_CHAR),
   };
+  if (prev.confused) stats.confused = prev.confused;
+  if (!correct && answered && answered !== char) {
+    stats.confused = { ...prev.confused, [answered]: (prev.confused?.[answered] ?? 0) + 1 };
+  }
   const window = [...progress.window, correct].slice(-UNLOCK_WINDOW);
   let next: KochProgress = { ...progress, window, stats: { ...progress.stats, [char]: stats } };
 
@@ -117,4 +129,54 @@ export function pickNextChar(
     if (r < 0) return chars[i];
   }
   return chars[chars.length - 1];
+}
+
+export interface CharReport {
+  char: string;
+  attempts: number;
+  /** Anteil falscher Antworten über alle Versuche (0–1). */
+  errorRate: number;
+}
+
+/** Zeichen mit mindestens `minAttempts` Versuchen, schlechteste zuerst. */
+export function charReports(progress: KochProgress, minAttempts = 1): CharReport[] {
+  return KOCH_ORDER.flatMap((char) => {
+    const s = progress.stats[char];
+    if (!s || s.attempts < minAttempts) return [];
+    return [{ char, attempts: s.attempts, errorRate: 1 - s.correct / s.attempts }];
+  }).sort((a, b) => b.errorRate - a.errorRate || b.attempts - a.attempts);
+}
+
+export interface Confusion {
+  /** Das geübte Zeichen. */
+  char: string;
+  /** Die stattdessen gegebene Antwort. */
+  answered: string;
+  count: number;
+}
+
+/** Häufigste Verwechslungen (mindestens 2 Mal), häufigste zuerst. */
+export function topConfusions(progress: KochProgress, limit = 5): Confusion[] {
+  const all: Confusion[] = [];
+  for (const [char, s] of Object.entries(progress.stats)) {
+    for (const [answered, count] of Object.entries(s.confused ?? {})) {
+      if (count >= 2) all.push({ char, answered, count });
+    }
+  }
+  return all.sort((a, b) => b.count - a.count || a.char.localeCompare(b.char)).slice(0, limit);
+}
+
+export interface Totals {
+  attempts: number;
+  correct: number;
+}
+
+export function totals(progress: KochProgress): Totals {
+  let attempts = 0;
+  let correct = 0;
+  for (const s of Object.values(progress.stats)) {
+    attempts += s.attempts;
+    correct += s.correct;
+  }
+  return { attempts, correct };
 }

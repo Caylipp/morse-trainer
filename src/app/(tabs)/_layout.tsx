@@ -32,6 +32,9 @@ export default function TabLayout() {
       <Tabs.Screen name="listen" options={{ title: t('tab.listen'), tabBarIcon: icon('headset') }} />
       <Tabs.Screen name="text" options={{ title: t('tab.text'), tabBarIcon: icon('chatbox-ellipses') }} />
       <Tabs.Screen name="settings" options={{ title: t('tab.settings'), tabBarIcon: icon('settings') }} />
+      {/* Unterseiten, erreichbar über die Optionen (nicht in der Tab-Leiste). */}
+      <Tabs.Screen name="stats" options={{ href: null }} />
+      <Tabs.Screen name="abbrev" options={{ href: null }} />
     </Tabs>
   );
 }

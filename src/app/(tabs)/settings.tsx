@@ -1,5 +1,6 @@
 /** Optionen: Darstellung, Sprache, Tempo, Farnsworth, Ton, Haptik und Lernfortschritt. */
 
+import { router } from 'expo-router';
 import { ReactNode } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +19,7 @@ const ACCENT_ORDER: Accent[] = ['amber', 'teal', 'blue', 'violet', 'rose'];
 export default function SettingsScreen() {
   const { colors, styles } = useTheme(makeStyles);
   const t = useT();
-  const { settings, updateSettings, progress, setProgress, resetProgress } = useStore();
+  const { settings, updateSettings, progress, setProgress, resetProgress, setSrs } = useStore();
 
   const confirm = (message: string, onYes: () => void) => {
     if (Platform.OS === 'web') {
@@ -37,6 +38,18 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.page}>
+        <View>
+          <SectionTitle>{t('more.title')}</SectionTitle>
+          <Card style={styles.card}>
+            <Row label={t('more.stats')} hint={t('more.statsHint')}>
+              <Button icon="stats-chart" accessibilityLabel={t('more.stats')} onPress={() => router.navigate('/stats' as never)} />
+            </Row>
+            <Row label={t('more.abbrev')} hint={t('more.abbrevHint')}>
+              <Button icon="chatbubbles-outline" accessibilityLabel={t('more.abbrev')} onPress={() => router.navigate('/abbrev' as never)} />
+            </Row>
+          </Card>
+        </View>
+
         <View>
           <SectionTitle>{t('settings.appearance')}</SectionTitle>
           <Card style={styles.card}>
@@ -197,6 +210,13 @@ export default function SettingsScreen() {
                 </View>
               );
             })}
+            <Button
+              label={t('settings.reset', { label: t('settings.abbrev') })}
+              icon="refresh"
+              onPress={() =>
+                confirm(t('settings.resetConfirm', { label: t('settings.abbrev') }), () => setSrs({}))
+              }
+            />
           </Card>
         </View>
 
